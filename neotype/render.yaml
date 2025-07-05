@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: neotype
+    runtime: python3
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn neotype.wsgi:application"
+    plan: free
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: DJANGO_SETTINGS_MODULE
+        value: neotype.settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+    healthCheckPath: /
+    
+  - type: pserv
+    name: neotype-db
+    plan: free
+    
+databases:
+  - name: neotype-db
+    databaseName: neotype
+    user: neotype

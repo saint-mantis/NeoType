@@ -113,7 +113,7 @@ body {
   grid-area: header;
   background: var(--color-bg-secondary);
   border-bottom: 1px solid var(--color-bg-tertiary);
-  padding: var(--space-sm) var(--space-lg);
+  padding: var(--space-xs) var(--space-lg);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -121,7 +121,7 @@ body {
 
 .app-main {
   grid-area: main;
-  padding: var(--space-lg);
+  padding: var(--space-sm) var(--space-lg);
   min-width: 0; /* Prevent grid blowout */
 }
 

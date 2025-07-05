@@ -9,12 +9,17 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-4r9e!q*^n4qm4w%6)an6x7lfbf=820^_9g^(ow-(r8=x0czub0'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-4r9e!q*^n4qm4w%6)an6x7lfbf=820^_9g^(ow-(r8=x0czub0')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.render.com',
+    '.onrender.com',
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -34,6 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -73,6 +79,15 @@ DATABASES = {
     }
 }
 
+# Override with PostgreSQL in production if DATABASE_URL is provided
+if 'DATABASE_URL' in os.environ:
+    try:
+        import dj_database_url
+        DATABASES['default'] = dj_database_url.parse(os.environ['DATABASE_URL'])
+    except ImportError:
+        # dj_database_url not available, stick with SQLite
+        pass
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -104,6 +119,10 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Static files storage for production
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
