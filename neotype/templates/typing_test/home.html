@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}NeoType - Test Your Typing Speed{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/typing-test.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="typing-test-container">
+    <div class="test-header">
+        <h2>Test Your Typing Speed</h2>
+        <p class="test-description">Challenge yourself with NeoType's advanced typing test</p>
+    </div>
+    
+    <div class="test-config">
+        <div class="duration-selector">
+            <label class="duration-label">Test Duration:</label>
+            <div class="duration-buttons">
+                <button class="duration-btn" data-duration="15" aria-label="15 second test">15s</button>
+                <button class="duration-btn active" data-duration="30" aria-label="30 second test">30s</button>
+                <button class="duration-btn" data-duration="60" aria-label="60 second test">60s</button>
+            </div>
+        </div>
+        
+        <div class="difficulty-selector">
+            <label class="difficulty-label">Difficulty:</label>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn" data-difficulty="easy">Easy</button>
+                <button class="difficulty-btn active" data-difficulty="medium">Medium</button>
+                <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="typing-area" id="typing-area">
+        <div id="text-display" class="text-content" role="textbox" aria-label="Typing test content">
+            <div class="loading-text">Click "Start Test" to begin typing...</div>
+        </div>
+        
+        <div class="stats-live" id="live-stats">
+            <div class="stat">
+                <span class="stat-label">WPM</span>
+                <span class="stat-value" id="wpm-display" aria-live="polite">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Accuracy</span>
+                <span class="stat-value" id="accuracy-display" aria-live="polite">100%</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Time</span>
+                <span class="stat-value" id="timer-display" aria-live="polite">30</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Progress</span>
+                <span class="stat-value" id="progress-display" aria-live="polite">0%</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="virtual-keyboard" id="virtual-keyboard" aria-label="Virtual keyboard display">
+        <div class="keyboard-row">
+            <button class="key" data-key="q" tabindex="-1">Q</button>
+            <button class="key" data-key="w" tabindex="-1">W</button>
+            <button class="key" data-key="e" tabindex="-1">E</button>
+            <button class="key" data-key="r" tabindex="-1">R</button>
+            <button class="key" data-key="t" tabindex="-1">T</button>
+            <button class="key" data-key="y" tabindex="-1">Y</button>
+            <button class="key" data-key="u" tabindex="-1">U</button>
+            <button class="key" data-key="i" tabindex="-1">I</button>
+            <button class="key" data-key="o" tabindex="-1">O</button>
+            <button class="key" data-key="p" tabindex="-1">P</button>
+        </div>
+        <div class="keyboard-row">
+            <button class="key" data-key="a" tabindex="-1">A</button>
+            <button class="key" data-key="s" tabindex="-1">S</button>
+            <button class="key" data-key="d" tabindex="-1">D</button>
+            <button class="key" data-key="f" tabindex="-1">F</button>
+            <button class="key" data-key="g" tabindex="-1">G</button>
+            <button class="key" data-key="h" tabindex="-1">H</button>
+            <button class="key" data-key="j" tabindex="-1">J</button>
+            <button class="key" data-key="k" tabindex="-1">K</button>
+            <button class="key" data-key="l" tabindex="-1">L</button>
+        </div>
+        <div class="keyboard-row">
+            <button class="key" data-key="z" tabindex="-1">Z</button>
+            <button class="key" data-key="x" tabindex="-1">X</button>
+            <button class="key" data-key="c" tabindex="-1">C</button>
+            <button class="key" data-key="v" tabindex="-1">V</button>
+            <button class="key" data-key="b" tabindex="-1">B</button>
+            <button class="key" data-key="n" tabindex="-1">N</button>
+            <button class="key" data-key="m" tabindex="-1">M</button>
+        </div>
+        <div class="keyboard-row">
+            <button class="key key-space" data-key=" " tabindex="-1">Space</button>
+        </div>
+    </div>
+    
+    <div class="test-controls">
+        <button class="btn btn-primary" id="start-test">Start Test</button>
+        <button class="btn btn-secondary" id="reset-test" disabled>Reset</button>
+        <button class="btn btn-ghost" id="practice-mode">Practice Mode</button>
+    </div>
+    
+    <!-- Results Modal -->
+    <div id="results-modal" class="results-modal hidden" role="dialog" aria-labelledby="results-title">
+        <div class="results-content">
+            <h2 id="results-title">Test Results</h2>
+            <div class="results-stats">
+                <div class="result-stat primary">
+                    <span class="label">WPM</span>
+                    <span class="value" id="result-wpm">0</span>
+                </div>
+                <div class="result-stat">
+                    <span class="label">Accuracy</span>
+                    <span class="value" id="result-accuracy">0%</span>
+                </div>
+                <div class="result-stat">
+                    <span class="label">Time</span>
+                    <span class="value" id="result-time">0s</span>
+                </div>
+                <div class="result-stat">
+                    <span class="label">Correct Chars</span>
+                    <span class="value" id="result-correct">0</span>
+                </div>
+                <div class="result-stat">
+                    <span class="label">Errors</span>
+                    <span class="value" id="result-errors">0</span>
+                </div>
+            </div>
+            
+            <div class="results-actions">
+                <button class="btn btn-primary" id="try-again">Try Again</button>
+                <button class="btn btn-secondary" id="view-leaderboard">View Leaderboard</button>
+                {% if not user.is_authenticated %}
+                <div class="signup-prompt">
+                    <p>Sign up to save your progress and compete on the leaderboard!</p>
+                    <a href="{% url 'accounts:signup' %}" class="btn btn-accent">Sign Up Now</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/typing-engine.js' %}"></script>
+<script src="{% static 'js/virtual-keyboard.js' %}"></script>
+<script src="{% static 'js/celebration.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+{% endblock %}

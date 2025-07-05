@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - NeoType{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Welcome Back</h1>
+            <p>Log in to continue your typing journey</p>
+        </div>
+        
+        <form method="post" id="login-form" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required 
+                       autofocus autocomplete="username">
+                <div class="field-error" id="username-error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required 
+                       autocomplete="current-password">
+                <div class="field-error" id="password-error"></div>
+            </div>
+            
+            <div class="form-group form-checkbox">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="remember_me" name="remember_me">
+                    <span class="checkmark"></span>
+                    Remember me
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-full" id="login-btn">
+                <span class="btn-text">Log In</span>
+                <span class="btn-spinner hidden">Logging in...</span>
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="{% url 'accounts:signup' %}">Sign up</a></p>
+            <p><a href="#" class="forgot-password">Forgot your password?</a></p>
+        </div>
+        
+        <div class="demo-section">
+            <h3>Try NeoType without signing up</h3>
+            <p>You can test your typing speed as a guest, but creating an account lets you track progress and compete on leaderboards.</p>
+            <a href="/" class="btn btn-secondary">Continue as Guest</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/auth-validation.js' %}"></script>
+<script>
+    // Initialize login form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        initLoginValidation();
+    });
+</script>
+{% endblock %}

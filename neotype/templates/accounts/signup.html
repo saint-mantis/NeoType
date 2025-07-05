@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign Up - NeoType{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Join NeoType</h1>
+            <p>Start tracking your typing progress today</p>
+        </div>
+        
+        <form method="post" id="signup-form" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required 
+                       minlength="3" maxlength="30" pattern="[a-zA-Z0-9_]+"
+                       aria-describedby="username-help">
+                <small id="username-help" class="form-help">
+                    3-30 characters, letters, numbers, and underscores only
+                </small>
+                <div class="field-error" id="username-error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required 
+                       aria-describedby="email-help">
+                <small id="email-help" class="form-help">
+                    We'll never share your email with anyone
+                </small>
+                <div class="field-error" id="email-error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required 
+                       minlength="8" aria-describedby="password-help">
+                <small id="password-help" class="form-help">
+                    At least 8 characters with uppercase, lowercase, and numbers
+                </small>
+                <div class="field-error" id="password-error"></div>
+                <div class="password-strength" id="password-strength"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+                <div class="field-error" id="confirm-password-error"></div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-full" id="signup-btn">
+                <span class="btn-text">Create Account</span>
+                <span class="btn-spinner hidden">Creating...</span>
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{% url 'accounts:login' %}">Log in</a></p>
+        </div>
+        
+        <div class="auth-features">
+            <h3>Why join NeoType?</h3>
+            <ul>
+                <li>✨ Track your typing progress over time</li>
+                <li>🏆 Compete on global leaderboards</li>
+                <li>📊 Get detailed performance analytics</li>
+                <li>🎯 Set and achieve personal goals</li>
+                <li>🔄 Sync across all your devices</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/auth-validation.js' %}"></script>
+<script>
+    // Initialize signup form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        initSignupValidation();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NeoType - Modern Typing Test{% endblock %}</title>
+    <meta name="description" content="NeoType - The modern typing test application with real-time feedback, advanced analytics, and beautiful UI">
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+    
+    <!-- CSRF token for AJAX requests -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+<body>
+    <div class="app-layout">
+        <header class="app-header">
+            <nav class="navigation">
+                <div class="nav-brand">
+                    <a href="/" class="brand-link">
+                        <h1 class="brand-logo">NeoType</h1>
+                        <span class="brand-tagline">Modern Typing Excellence</span>
+                    </a>
+                </div>
+                <div class="nav-actions">
+                    <button class="btn btn-secondary" id="theme-toggle" aria-label="Toggle theme">
+                        <span class="icon">🌙</span>
+                    </button>
+                    {% if user.is_authenticated %}
+                        <span class="user-greeting">Hello, {{ user.username }}!</span>
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-primary">Profile</a>
+                        <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-ghost">Logout</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="btn btn-primary">Login</a>
+                        <a href="{% url 'accounts:signup' %}" class="btn btn-secondary">Sign Up</a>
+                    {% endif %}
+                </div>
+            </nav>
+            
+            <!-- Navigation menu for smaller screens -->
+            <div class="mobile-nav" id="mobile-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/leaderboard/" class="nav-link">Leaderboard</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:profile' %}" class="nav-link">Profile</a>
+                {% endif %}
+            </div>
+        </header>
+        
+        <main class="app-main">
+            <!-- Flash messages -->
+            {% if messages %}
+                <div class="messages" id="messages">
+                    {% for message in messages %}
+                        <div class="message {{ message.tags }}">
+                            <span class="message-text">{{ message }}</span>
+                            <button class="message-close" onclick="this.parentElement.remove()">×</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </main>
+        
+        <aside class="stats-panel">
+            {% block sidebar %}
+                <div class="user-stats">
+                    {% if user.is_authenticated and user_stats %}
+                        <h3>Your NeoType Stats</h3>
+                        <div class="stat-card">
+                            <span class="stat-label">Best WPM (30s)</span>
+                            <span class="stat-value">{{ user_stats.best_wmp_30s|default:0 }}</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Avg Accuracy</span>
+                            <span class="stat-value">{{ user_stats.avg_accuracy|floatformat:1 }}%</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Tests Completed</span>
+                            <span class="stat-value">{{ user_stats.completed_tests }}</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Current Streak</span>
+                            <span class="stat-value">{{ user_stats.current_streak }}</span>
+                        </div>
+                    {% else %}
+                        <div class="guest-message">
+                            <h3>Welcome to NeoType!</h3>
+                            <p>Sign up to track your progress and compete on the leaderboard.</p>
+                            <a href="{% url 'accounts:signup' %}" class="btn btn-primary">Get Started</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endblock %}
+        </aside>
+    </div>
+    
+    <!-- Celebration Elements -->
+    <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
+    <div id="achievement-modal" class="achievement-modal hidden" role="dialog" aria-labelledby="achievement-title">
+        <div class="achievement-content">
+            <h2 id="achievement-title">🎉 New Personal Record!</h2>
+            <p>Congratulations on your new best score in NeoType!</p>
+            <div class="achievement-stats">
+                <div class="achievement-stat">
+                    <span class="label">WPM</span>
+                    <span class="value" id="achievement-wpm">0</span>
+                </div>
+                <div class="achievement-stat">
+                    <span class="label">Accuracy</span>
+                    <span class="value" id="achievement-accuracy">0%</span>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="closeAchievementModal()">Continue</button>
+        </div>
+    </div>
+    
+    <!-- Offline Indicator -->
+    <div id="offline-indicator" class="offline-indicator hidden">
+        <span class="offline-icon">📶</span>
+        <span class="offline-text">You're offline - data will sync when reconnected</span>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+    </div>
+    
+    {% load static %}
+    <script src="{% static 'js/auth.js' %}"></script>
+    <script src="{% static 'js/theme.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

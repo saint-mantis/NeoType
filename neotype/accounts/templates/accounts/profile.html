@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Profile - NeoType{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <div class="avatar-placeholder">
+                {{ user.username|first|upper }}
+            </div>
+        </div>
+        <div class="profile-info">
+            <h1>{{ user.username }}</h1>
+            <p class="profile-email">{{ user.email }}</p>
+            <p class="profile-joined">Joined {{ user.date_joined|date:"M d, Y" }}</p>
+        </div>
+        <div class="profile-actions">
+            <a href="#" class="btn btn-secondary" onclick="alert('Edit profile feature coming soon!')">Edit Profile</a>
+            <a href="{% url 'accounts:logout' %}" class="btn btn-outline">Logout</a>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="profile-stats">
+            <div class="stats-header">
+                <h2>Your Statistics</h2>
+                <div class="stats-period">
+                    <button class="period-btn active" data-period="all">All Time</button>
+                    <button class="period-btn" data-period="30">30 Days</button>
+                    <button class="period-btn" data-period="7">7 Days</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="best-wpm">{{ user_stats.best_wpm|floatformat:0|default:"--" }}</div>
+                        <div class="stat-label">Best WPM</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="avg-wpm">{{ user_stats.avg_wpm|floatformat:0|default:"--" }}</div>
+                        <div class="stat-label">Average WPM</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="avg-accuracy">{{ user_stats.avg_accuracy|floatformat:1|default:"--" }}%</div>
+                        <div class="stat-label">Average Accuracy</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="tests-completed">{{ user_stats.tests_completed|default:"0" }}</div>
+                        <div class="stat-label">Tests Completed</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="time-practiced">{{ user_stats.time_practiced|default:"0" }}m</div>
+                        <div class="stat-label">Time Practiced</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="consistency">{{ user_stats.consistency|floatformat:1|default:"--" }}%</div>
+                        <div class="stat-label">Consistency</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-charts">
+            <div class="chart-section">
+                <h3>Progress Over Time</h3>
+                <div class="chart-container">
+                    <canvas id="progress-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h3>Accuracy Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="accuracy-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-tests">
+            <div class="section-header">
+                <h3>Recent Tests</h3>
+                <a href="#" class="btn btn-outline btn-sm" onclick="alert('Test history feature coming soon!')">View All</a>
+            </div>
+
+            <div class="tests-list">
+                {% for test in recent_tests %}
+                <div class="test-item">
+                    <div class="test-date">
+                        {{ test.created_at|date:"M d, H:i" }}
+                    </div>
+                    <div class="test-stats">
+                        <span class="test-wpm">{{ test.wpm|floatformat:0 }} WPM</span>
+                        <span class="test-accuracy">{{ test.accuracy|floatformat:1 }}%</span>
+                        <span class="test-duration">{{ test.duration }}s</span>
+                    </div>
+                    <div class="test-actions">
+                        <button class="btn btn-sm btn-ghost" onclick="viewTestDetails({{ test.id }})">Details</button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-tests">
+                    <p>No tests completed yet.</p>
+                    <a href="{% url 'typing_test:index' %}" class="btn btn-primary">Start Your First Test</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="achievements">
+            <h3>Achievements</h3>
+            <div class="achievements-grid">
+                <div class="achievement {% if user_stats.tests_completed >= 1 %}earned{% endif %}">
+                    <div class="achievement-icon">🎯</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">First Test</div>
+                        <div class="achievement-description">Complete your first typing test</div>
+                    </div>
+                </div>
+
+                <div class="achievement {% if user_stats.tests_completed >= 10 %}earned{% endif %}">
+                    <div class="achievement-icon">🔥</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">Getting Started</div>
+                        <div class="achievement-description">Complete 10 typing tests</div>
+                    </div>
+                </div>
+
+                <div class="achievement {% if user_stats.best_wpm >= 40 %}earned{% endif %}">
+                    <div class="achievement-icon">⚡</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">Speed Demon</div>
+                        <div class="achievement-description">Reach 40 WPM</div>
+                    </div>
+                </div>
+
+                <div class="achievement {% if user_stats.avg_accuracy >= 95 %}earned{% endif %}">
+                    <div class="achievement-icon">🎯</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">Accuracy Expert</div>
+                        <div class="achievement-description">Maintain 95% average accuracy</div>
+                    </div>
+                </div>
+
+                <div class="achievement {% if user_stats.tests_completed >= 100 %}earned{% endif %}">
+                    <div class="achievement-icon">🏆</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">Century Club</div>
+                        <div class="achievement-description">Complete 100 typing tests</div>
+                    </div>
+                </div>
+
+                <div class="achievement {% if user_stats.best_wpm >= 100 %}earned{% endif %}">
+                    <div class="achievement-icon">🚀</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">Lightning Fast</div>
+                        <div class="achievement-description">Reach 100 WPM</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Test Details Modal -->
+<div id="test-details-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Test Details</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <!-- Test details will be loaded here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/profile.js' %}"></script>
+<script>
+    // Profile data for JavaScript
+    window.profileData = {
+        userId: {{ user.id }},
+        username: '{{ user.username }}',
+        stats: {
+            bestWpm: {{ user_stats.best_wpm|default:"null" }},
+            avgWpm: {{ user_stats.avg_wpm|default:"null" }},
+            avgAccuracy: {{ user_stats.avg_accuracy|default:"null" }},
+            testsCompleted: {{ user_stats.tests_completed|default:"0" }},
+            timePracticed: {{ user_stats.time_practiced|default:"0" }},
+            consistency: {{ user_stats.consistency|default:"null" }}
+        }
+    };
+</script>
+{% endblock %}

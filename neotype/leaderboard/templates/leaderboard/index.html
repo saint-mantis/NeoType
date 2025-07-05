@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Leaderboard - NeoType{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/leaderboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="leaderboard-container">
+    <div class="leaderboard-header">
+        <h1>🏆 Leaderboard</h1>
+        <p>See how you rank against other typists</p>
+    </div>
+
+    <div class="leaderboard-controls">
+        <div class="category-selector">
+            <button class="category-btn active" data-category="wpm">WPM</button>
+            <button class="category-btn" data-category="accuracy">Accuracy</button>
+            <button class="category-btn" data-category="consistency">Consistency</button>
+        </div>
+
+        <div class="time-period-selector">
+            <button class="period-btn active" data-period="all">All Time</button>
+            <button class="period-btn" data-period="30">30 Days</button>
+            <button class="period-btn" data-period="7">7 Days</button>
+            <button class="period-btn" data-period="today">Today</button>
+        </div>
+
+        <div class="search-filter">
+            <input type="text" id="search-users" placeholder="Search users..." class="search-input">
+            <button class="btn btn-secondary" onclick="refreshLeaderboard()">
+                <span class="refresh-icon">🔄</span>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="leaderboard-content">
+        <div class="podium">
+            <div class="podium-position second" id="podium-2">
+                <div class="podium-rank">2</div>
+                <div class="podium-user">
+                    <div class="podium-avatar">--</div>
+                    <div class="podium-username">Loading...</div>
+                    <div class="podium-score">-- WPM</div>
+                </div>
+            </div>
+
+            <div class="podium-position first" id="podium-1">
+                <div class="podium-rank">1</div>
+                <div class="podium-user">
+                    <div class="podium-avatar">🏆</div>
+                    <div class="podium-username">Loading...</div>
+                    <div class="podium-score">-- WPM</div>
+                </div>
+            </div>
+
+            <div class="podium-position third" id="podium-3">
+                <div class="podium-rank">3</div>
+                <div class="podium-user">
+                    <div class="podium-avatar">--</div>
+                    <div class="podium-username">Loading...</div>
+                    <div class="podium-score">-- WPM</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="leaderboard-table">
+            <div class="table-header">
+                <div class="header-rank">Rank</div>
+                <div class="header-user">User</div>
+                <div class="header-score">Score</div>
+                <div class="header-tests">Tests</div>
+                <div class="header-accuracy">Accuracy</div>
+                <div class="header-last-active">Last Active</div>
+            </div>
+
+            <div class="table-body" id="leaderboard-list">
+                <!-- Loading placeholder -->
+                <div class="loading-placeholder">
+                    <div class="loading-spinner"></div>
+                    <p>Loading leaderboard...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination">
+            <button class="pagination-btn" id="prev-page" onclick="loadPage(-1)">Previous</button>
+            <div class="page-info">
+                <span id="current-page">1</span> of <span id="total-pages">1</span>
+            </div>
+            <button class="pagination-btn" id="next-page" onclick="loadPage(1)">Next</button>
+        </div>
+    </div>
+
+    <div class="your-rank" id="your-rank">
+        {% if user.is_authenticated %}
+        <div class="rank-card">
+            <div class="rank-info">
+                <h3>Your Rank</h3>
+                <div class="rank-details">
+                    <div class="rank-position" id="user-rank">Loading...</div>
+                    <div class="rank-stats">
+                        <div class="rank-stat">
+                            <span class="rank-value" id="user-wpm">--</span>
+                            <span class="rank-label">WPM</span>
+                        </div>
+                        <div class="rank-stat">
+                            <span class="rank-value" id="user-accuracy">--%</span>
+                            <span class="rank-label">Accuracy</span>
+                        </div>
+                        <div class="rank-stat">
+                            <span class="rank-value" id="user-tests">--</span>
+                            <span class="rank-label">Tests</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="rank-actions">
+                <a href="{% url 'typing_test:index' %}" class="btn btn-primary">Practice Now</a>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">View Profile</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="guest-message">
+            <h3>Join the Competition!</h3>
+            <p>Create an account to track your progress and compete on the leaderboard.</p>
+            <div class="guest-actions">
+                <a href="{% url 'accounts:signup' %}" class="btn btn-primary">Sign Up</a>
+                <a href="{% url 'accounts:login' %}" class="btn btn-secondary">Log In</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="leaderboard-stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="total-users">Loading...</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-icon">📊</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="total-tests">Loading...</div>
+                    <div class="stat-label">Total Tests</div>
+                </div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="highest-wpm">Loading...</div>
+                    <div class="stat-label">Highest WPM</div>
+                </div>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="avg-accuracy">Loading...</div>
+                    <div class="stat-label">Average Accuracy</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div id="user-details-modal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>User Details</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="user-profile">
+                <div class="profile-avatar">
+                    <span id="modal-user-avatar">U</span>
+                </div>
+                <div class="profile-info">
+                    <h4 id="modal-username">Username</h4>
+                    <p id="modal-join-date">Joined: --</p>
+                </div>
+            </div>
+            
+            <div class="user-stats">
+                <div class="stats-row">
+                    <div class="stat">
+                        <span class="stat-label">Best WPM</span>
+                        <span class="stat-value" id="modal-best-wpm">--</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Average WPM</span>
+                        <span class="stat-value" id="modal-avg-wpm">--</span>
+                    </div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat">
+                        <span class="stat-label">Accuracy</span>
+                        <span class="stat-value" id="modal-accuracy">--%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Tests</span>
+                        <span class="stat-value" id="modal-tests">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-achievements">
+                <h5>Recent Achievements</h5>
+                <div class="achievements-list" id="modal-achievements">
+                    <!-- Achievements will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/leaderboard.js' %}"></script>
+<script>
+    // Initialize leaderboard
+    document.addEventListener('DOMContentLoaded', function() {
+        window.leaderboard = new Leaderboard({
+            userId: {% if user.is_authenticated %}{{ user.id }}{% else %}null{% endif %},
+            isAuthenticated: {% if user.is_authenticated %}true{% else %}false{% endif %}
+        });
+    });
+</script>
+{% endblock %}

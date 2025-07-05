@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source:*)",
+      "Bash(python manage.py startapp:*)",
+      "Bash(mkdir:*)",
+      "Bash(python manage.py:*)",
+      "Bash(python:*)",
+      "Bash(DJANGO_SETTINGS_MODULE=neotype.settings python manage.py makemigrations accounts)",
+      "Bash(export DJANGO_SETTINGS_MODULE='neotype.settings.development')",
+      "Bash(export DJANGO_SETTINGS_MODULE='neotype.settings')",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(true)",
+      "Bash(mv:*)",
+      "Bash(conda activate:*)"
+    ],
+    "deny": []
+  }
+}
